@@ -1,0 +1,19 @@
+nginx:
+  image: nginx:latest
+  container_name: nginx
+  ports:
+    - 80:80
+  volumes:
+    - ./public:/usr/share/nginx/html
+
+# https://forums.docker.com/t/overriding-entrypoint-and-command-in-docker-compose-yml/38589
+shadow-builder:
+  image: clojure:openjdk-16-tools-deps
+  container_name: shadow-builder
+  ports:
+    - 7888:7888
+  working_dir: /tmp
+  volumes:
+    - ./:/tmp
+  command: npm install shadow-cljs
+  # clj -A:shadow-cljs watch frontend
