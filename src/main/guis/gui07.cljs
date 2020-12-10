@@ -59,6 +59,10 @@
      :FORM  (fn [op & args] (apply op args))}
     parse-tree))
 
+(defn eval-cell [graph cell]
+  (let [{:keys [parse-tree]} (graph cell)]
+    (post-transform parse-tree graph)))
+
 (-> "A1" parser pre-transform)
 (-> "42" parser pre-transform)
 (-> "-21" parser pre-transform)
