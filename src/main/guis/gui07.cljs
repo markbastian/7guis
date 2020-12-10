@@ -63,18 +63,20 @@
   (let [{:keys [parse-tree]} (graph cell)]
     (post-transform parse-tree graph)))
 
-(-> "A1" parser pre-transform)
-(-> "42" parser pre-transform)
-(-> "-21" parser pre-transform)
-(-> "3.14" parser pre-transform)
-(-> "-3.14" parser pre-transform)
-(-> "'-3.14'" parser pre-transform)
-(-> "=(+ 5 (- A4 7))" parser pre-transform)
-(-> "=(- A4 7)" parser pre-transform meta)
-(-> "=(+ 5 (- A4 7))" parser pre-transform)
-(-> "=(+ 5 B5 (- A4 7) (- C1 7))" parser pre-transform meta)
-(-> "=(+ 5 (- A4 7))" parser pre-transform (post-transform {:A4 42}))
-(-> "=(+ 5 (- 7))" parser pre-transform (post-transform {}))
+(comment
+  ;TODO - Create tests
+  (-> "A1" parser pre-transform)
+  (-> "42" parser pre-transform)
+  (-> "-21" parser pre-transform)
+  (-> "3.14" parser pre-transform)
+  (-> "-3.14" parser pre-transform)
+  (-> "'-3.14'" parser pre-transform)
+  (-> "=(+ 5 (- A4 7))" parser pre-transform)
+  (-> "=(- A4 7)" parser pre-transform meta)
+  (-> "=(+ 5 (- A4 7))" parser pre-transform)
+  (-> "=(+ 5 B5 (- A4 7) (- C1 7))" parser pre-transform meta)
+  (-> "=(+ 5 (- A4 7))" parser pre-transform (post-transform {:A4 42}))
+  (-> "=(+ 5 (- 7))" parser pre-transform (post-transform {})))
 
 (def state (r/atom
              (-> {}
