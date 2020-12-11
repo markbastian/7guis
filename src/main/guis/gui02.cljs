@@ -7,48 +7,39 @@
 (defn c->f [c]
   (+ (/ (* c 9) 5) 32.0))
 
-(defn update-temp [xform temperature-celsius s]
-  (if (seq s)
-    (let [celsius (xform (js/parseFloat s))]
-      (when-not
-        (or
-          (= @temperature-celsius celsius)
-          (js/isNaN celsius))
-        (reset! temperature-celsius celsius)))
-    (reset! temperature-celsius nil)))
+(defn gain-focus [e state scale]
+  (let [v (.-value (.-target e))]
+    (swap! state assoc :editing scale :text v)))
 
-(def update-celsius (partial update-temp identity))
-(def update-fahrenheit (partial update-temp f->c))
+(defn value [state scale xform]
+  (let [{:keys [text]} @state]
+    (if (= scale (:editing @state))
+      text
+      (let [temp (js/parseFloat text)]
+        (when-not (js/isNaN temp)
+          (xform temp))))))
 
-(defn add-temp-checker [temperature-state]
-  (add-watch :valid-temps temperature-state
-             (fn [_ _ o n]
-               (when-not (= o n)
-                 (if n (max n -273.15) n)))))
+(defn change [e state]
+  (let [v (.-value (.-target e))]
+    (swap! state assoc :text v)))
 
-;Fix bare - sign
+(defn render-temp [state lbl scale xform]
+  [:div.input-group-prepend
+   [:span#basic-addon1.input-group-text {:style {:width :30px :text-align :center}} lbl]
+   [:input.form-control
+    {:type      "text"
+     :on-focus  (fn [e] (gain-focus e state scale))
+     :value     (value state scale xform)
+     :on-change (fn [e] (change e state))}]])
+
 (defn render []
-  (let [temperature-state (r/atom nil)]
+  (let [state (r/atom nil)]
     (fn []
       [:div
        [:h2 "Task 2: Temperature Converter"]
        [:span
-        [:div.input-group-prepend
-         [:span#basic-addon1.input-group-text {:style {:width :30px :text-align :center}} "F"]
-         [:input.form-control
-          {:type      "text"
-           :value     (some-> @temperature-state c->f)
-           :on-change (fn [e] (update-fahrenheit
-                                temperature-state
-                                (.-value (.-target e))))}]]
-        [:div.input-group-prepend
-         [:span#basic-addon1.input-group-text {:style {:width :30px :text-align :center}} "C"]
-         [:input.form-control
-          {:type      "text"
-           :value     (some-> @temperature-state)
-           :on-change (fn [e] (update-celsius
-                                temperature-state
-                                (.-value (.-target e))))}]]]
+        [render-temp state "F" :fahrenheit c->f]
+        [render-temp state "C" :celsius f->c]]
        [:h5 "About"]
        [:p "Temperature converter"]
        [:ul
