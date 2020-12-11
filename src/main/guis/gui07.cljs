@@ -6,26 +6,23 @@
                (xcell/update-cell! :A1 "42")
                (xcell/update-cell! :B2 "=(+ A1 1)")))
 
-;TODO - Get horizontal scrollbars working right. Need to level up my css-fu.
-; https://stackoverflow.com/questions/5533636/add-horizontal-scrollbar-to-html-table
-; https://www.w3schools.com/howto/howto_css_menu_horizontal_scroll.asp
 (defn render []
   (let []
     (fn []
-      ;NOTE - Currently limited to 10x10 until scroll bars in place.
-      (let [nrows 10 ncols 10]
+      (let [nrows 100
+            ncols 26
+            cell-style {:style {:border "1px solid black"}}]
         [:div
          [:h2 "Task 7: Cells"]
-         [:div
-          [:table {:style {:border "1px solid black"}}
+         [:div {:style {:width :100% :height :600px :overflow-x :auto}}
+          [:table cell-style
            [:thead
-            [:tr {:style {:border "1px solid black"}}
+            [:tr cell-style
              (doall
                (for [i (range (inc ncols))
                      :let [col (char (+ 64 i))]]
                  ^{:key (str "col:" col)}
-                 [:th {:style {:border "1px solid black" :width :100px}}
-                  (when-not (zero? i) col)]))]]
+                 [:th cell-style (when-not (zero? i) col)]))]]
            [:tbody
             (doall
               (for [row-index (map inc (range nrows))]
@@ -38,11 +35,12 @@
                                cell (keyword cell-index)]]
                      ^{:key (str "cell:" cell-index)}
                      ;http://help.openspan.com/80/HTML_Table_Designer/html_table_designer_-_Cell_-_properties,_methods_and_events.htm
-                     [:td {:style {:border "1px solid black" :width :100px}}
+                     [:td cell-style
                       (if (zero? column-index)
                         row-index
                         [:input.form-control
                          {:type       "text"
+                          :style      {:border :none :width :120px}
                           :value      (let [{:keys [temp-value active-cell] :as s} @state]
                                         (or
                                           (and (= cell active-cell) temp-value)
@@ -69,9 +67,9 @@
            [:div.input-group-prepend
             [:span#basic-addon1.input-group-text (str (name active-cell) ":")]
             [:input.form-control
-             {:type "text"
-              :value     (let [{:keys [temp-value] :as s} @state]
-                           temp-value)
+             {:type       "text"
+              :value      (let [{:keys [temp-value]} @state]
+                            temp-value)
               :on-change  (fn [e]
                             (let [v (.-value (.-target e))]
                               (swap! state assoc :temp-value v)))
