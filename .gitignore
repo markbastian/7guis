@@ -1,5 +1,4 @@
 node_modules/
-public/js
 
 /target
 /checkouts
@@ -20,4 +19,3 @@ pom.xml.asc
 .hg/
 
 /.cpcache
-public/js
