@@ -1,6 +1,8 @@
 # 7 GUIS
 An implementation of the [7 Tasks](https://eugenkiss.github.io/7guis/tasks).
 
+This is the code repo. See it live [right here](https://markbastian.github.io/7guis/index.html).
+
 ## Status
 MVP Feature Complete.
 
@@ -25,4 +27,5 @@ The Cells API is fairly cool. I broke it out as two cljc nses so it could potent
   * Jack in to localhost:7888
   * Open public/index.html in your browser
   * Execute `(shadow.cljs.devtools.api/nrepl-select :frontend)` in your ns.
+* `clj -A:shadow-cljs release frontend` will create a minified js file.
 * Refresher on [gh-pages](https://jiafulow.github.io/blog/2020/07/09/create-gh-pages-branch-in-existing-repo/) creation.
