@@ -14,9 +14,11 @@ The Cells API is fairly cool. I broke it out as two cljc nses so it could potent
 
 ## TODOS
 
-* I am not a CSS genius. I need to skill up on that front and add a little polish:
-  * Make cells in table fill entire width of screen.
-  * Add horizontal and vertical scroll bars.
+* Cells
+  * Add cycles or cycle limits
+  * Self-hosted cljs for cells vs. a parser?
+  * More functions?
+  * Evaluate watch-per-cell vs. global watch for performance
 
 ## Tips
 
