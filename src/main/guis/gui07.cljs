@@ -11,7 +11,6 @@
 
 (defn press-enter-handler [e state cell]
   (let [v (.-value (.-target e))]
-    (println v)
     (when (= (.-key e) "Enter")
       (doto state
         (xcell/update-cell! cell v)
