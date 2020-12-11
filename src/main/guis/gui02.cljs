@@ -18,7 +18,7 @@
     (reset! temperature-celsius nil)))
 
 (def update-celsius (partial update-temp identity))
-(def update-farenheit (partial update-temp f->c))
+(def update-fahrenheit (partial update-temp f->c))
 
 (defn add-temp-checker [temperature-state]
   (add-watch :valid-temps temperature-state
@@ -34,18 +34,23 @@
        [:h2 "Task 2: Temperature Converter"]
        [:span
         [:div.input-group-prepend
-         [:span#basic-addon1.input-group-text "F"]
+         [:span#basic-addon1.input-group-text {:style {:width :30px :text-align :center}} "F"]
          [:input.form-control
           {:type      "text"
            :value     (some-> @temperature-state c->f)
-           :on-change (fn [e] (update-farenheit
+           :on-change (fn [e] (update-fahrenheit
                                 temperature-state
                                 (.-value (.-target e))))}]]
         [:div.input-group-prepend
-         [:span#basic-addon1.input-group-text "C"]
+         [:span#basic-addon1.input-group-text {:style {:width :30px :text-align :center}} "C"]
          [:input.form-control
           {:type      "text"
            :value     (some-> @temperature-state)
            :on-change (fn [e] (update-celsius
                                 temperature-state
-                                (.-value (.-target e))))}]]]])))
+                                (.-value (.-target e))))}]]]
+       [:h5 "About"]
+       [:p "Temperature converter"]
+       [:ul
+        [:li "Enter a Fahrenheit temperature and watch the Celsius value change."]
+        [:li "Enter a Celsius temperature and watch the Fahrenheit value change."]]])))

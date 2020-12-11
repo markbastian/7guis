@@ -22,7 +22,7 @@
          [:option {:value :one-way} "one-way flight"]
          [:option {:value :return} "return flight"]]
         [:div.input-group-prepend
-         [:span#basic-addon1.input-group-text "Depart:"]
+         [:span#basic-addon1.input-group-text {:style {:width :90px}} "Depart:"]
          [:input.form-control
           {:type      "date"
            :value     (:depart-date @state)
@@ -35,7 +35,7 @@
                             (swap! state assoc :depart-date v))))
            }]]
         [:div.input-group-prepend {}
-         [:span#basic-addon1.input-group-text "Return:"]
+         [:span#basic-addon1.input-group-text {:style {:width :90px}} "Return:"]
          [:input.form-control
           {:type      "date"
            :readOnly  (= :one-way (:booking-type @state))
@@ -63,4 +63,12 @@
          {:type        "button"
           :data-toggle "modal"
           :data-target "#flightBookingModal"}
-         "Book"]]])))
+         "Book"]]
+       [:h5 "About"]
+       [:p "Book some flights with constraints"]
+       [:ul
+        [:li "Note that one-way flights are the default."]
+        [:li "If you adjust the departure greater than the return time, the return time will track with it."]
+        [:li "Select return flight."]
+        [:li "The return flight will always be constrained to be >= the depart time."]
+        [:li "The Book button will give you a modal popup telling you your flight details."]]])))

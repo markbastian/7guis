@@ -65,7 +65,7 @@
            {:type     "button"
             :on-click (fn [_] (swap! state dissoc :selected-index))}
            "Done"]]
-         [:span
+         [:div
           [:button.btn.btn-primary
            {:type     "button"
             :on-click (fn [_]
@@ -80,4 +80,11 @@
                                (fn [{:keys [undo-redo-index circles] :as s}]
                                  (assoc s :undo-redo-index
                                           (min (count circles) (inc undo-redo-index))))))}
-           "Redo"]])])))
+           "Redo"]])
+       [:h5 "About"]
+       [:p "Interactively draw circles with undo/redo history."]
+       [:ul
+        [:li "Click to start a circle and drag outward to size it."]
+        [:li "Undo/redo shoud make sense."]
+        [:li "Click a circle to get a slider bar to resize."]
+        ]])))

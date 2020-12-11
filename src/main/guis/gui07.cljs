@@ -12,7 +12,8 @@
 (defn render []
   (let []
     (fn []
-      (let [nrows 10 ncols 5]
+      ;NOTE - Currently limited to 10x10 until scroll bars in place.
+      (let [nrows 10 ncols 10]
         [:div
          [:h2 "Task 7: Cells"]
          [:div
@@ -79,5 +80,18 @@
                               (when (= (.-key e) "Enter")
                                 (doto state
                                   (xcell/update-cell! active-cell v)
-                                  (swap! dissoc :temp-value)))))
-              }]])]))))
+                                  (swap! dissoc :temp-value)))))}]])
+         [:h5 "About"]
+         [:p "This is an Excel-like spreadsheet with formulas, propagation, etc. Here are some things to try:"]
+         [:ul
+          [:li "Click a cell. Note that you can edit the cell in place or in the formula bar at the bottom."]
+          [:li "Formulas are Clojure-like. Try the following:"
+           [:ul
+            [:li "Enter a value like 42, 3.14159"]
+            [:li "Enter a formula starting with an equal sign followed by a form, like =(+ A1 4)"]
+            [:li "Forms can be nested (e.g. =(+ A1 (/ B3 1)))"]]]
+          [:li "Current valid operators are +, -, *, /, and sqrt."]
+          [:li "NOTE: Cycle detection hasn't been added yet, so currently a non-DAG will break. Future options:"
+           [:ul
+            [:li "Catch cycles and don't allow."]
+            [:li "Allow for fixed-point iteration. The numerical analyst in me wants this."]]]]]))))
