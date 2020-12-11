@@ -1,5 +1,6 @@
 (ns xcell.core
-  (:require [xcell.parser :as parser]))
+  (:require [xcell.parser :as parser]
+            [instaparse.core :as insta]))
 
 (defn eval-cell
   "Evaluate in place the contents of the given cell."
@@ -29,17 +30,21 @@
 (defn update-cell
   "Update the string contents of a cell."
   [graph cell text]
-  (let [parse-tree (parser/text->parse-tree text)
-        ancestors (:deps (meta parse-tree))
-        value (parser/post-transform parse-tree graph)
-        new-cell {:text       text
-                  :parse-tree parse-tree
-                  :ancestors  (set ancestors)
-                  :value      value}]
-    (-> graph
-        (remove-ancestor-links cell)
-        (update cell (fn [c] (into (or c {}) new-cell)))
-        (add-ancestor-links cell ancestors))))
+  (let [p (parser/parser text)]
+    (if-not (insta/failure? p)
+      (let [parse-tree (parser/pre-transform p)
+            ancestors (:deps (meta parse-tree))
+            value (parser/post-transform parse-tree graph)
+            new-cell {:text       text
+                      :parse-tree parse-tree
+                      :ancestors  (set ancestors)
+                      :value      value}]
+        (-> graph
+            (remove-ancestor-links cell)
+            (update cell (fn [c]
+                           (dissoc (into (or c {}) new-cell) :error)))
+            (add-ancestor-links cell ancestors)))
+      (assoc-in graph [cell :error] (insta/get-failure p)))))
 
 (defn propagate-change
   "Propagate the value of a cell to its children."

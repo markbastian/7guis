@@ -12,14 +12,10 @@
 (defn render []
   (let []
     (fn []
-      (let [nrows 100 ncols 10]
+      (let [nrows 10 ncols 5]
         [:div
          [:h2 "Task 7: Cells"]
-         [:div {:style {:width :800px
-                        :height :600px
-                        :display :block
-                        :overflow :auto
-                        :overflow-x :auto}}
+         [:div
           [:table {:style {:border "1px solid black"}}
            [:thead
             [:tr {:style {:border "1px solid black"}}
@@ -40,29 +36,48 @@
                                cell-index (str col row-index)
                                cell (keyword cell-index)]]
                      ^{:key (str "cell:" cell-index)}
+                     ;http://help.openspan.com/80/HTML_Table_Designer/html_table_designer_-_Cell_-_properties,_methods_and_events.htm
                      [:td {:style {:border "1px solid black" :width :100px}}
                       (if (zero? column-index)
                         row-index
                         [:input.form-control
                          {:type       "text"
-                          :value      (get-in @state [cell :value])
-                          :on-click   (fn [_] (swap! state assoc :active-cell cell))
+                          :value      (let [{:keys [temp-value active-cell] :as s} @state]
+                                        (or
+                                          (and (= cell active-cell) temp-value)
+                                          (get-in s [cell :value])))
+                          :on-click   (fn [_]
+                                        (let [{:keys [active-cell temp-value]} @state]
+                                          (when
+                                            (and active-cell temp-value)
+                                            (xcell/update-cell! state active-cell temp-value))
+                                          (doto state
+                                            (swap! assoc
+                                                   :active-cell cell
+                                                   :temp-value (get-in @state [cell :text])))))
                           :on-change  (fn [e]
                                         (let [v (.-value (.-target e))]
-                                          (xcell/update-cell! state cell v)))
+                                          (swap! state assoc :temp-value v)))
                           :onKeyPress (fn [e]
-                                        (if (= (.-key e) "Enter")
-                                          (.log js/console "Enter")
-                                          (.log js/console "Not Enter")))
-                          ;:on-keyup (fn [e] (js/alert "faess"))
-                          }])]))]))]]]
+                                        (let [v (.-value (.-target e))]
+                                          (when (= (.-key e) "Enter")
+                                            (doto state
+                                              (xcell/update-cell! cell v)
+                                              (swap! dissoc :temp-value)))))}])]))]))]]]
          (when-some [active-cell (:active-cell @state)]
-           [:div.input-group-prepend {:style {:width :800px}}
+           [:div.input-group-prepend
             [:span#basic-addon1.input-group-text (str (name active-cell) ":")]
             [:input.form-control
              {:type "text"
-              ;:value     (some-> @temperature-state c->f)
-              ;:on-change (fn [e] (update-farenheit
-              ;                     temperature-state
-              ;                     (.-value (.-target e))))
+              :value     (let [{:keys [temp-value] :as s} @state]
+                           temp-value)
+              :on-change  (fn [e]
+                            (let [v (.-value (.-target e))]
+                              (swap! state assoc :temp-value v)))
+              :onKeyPress (fn [e]
+                            (let [v (.-value (.-target e))]
+                              (when (= (.-key e) "Enter")
+                                (doto state
+                                  (xcell/update-cell! active-cell v)
+                                  (swap! dissoc :temp-value)))))
               }]])]))))

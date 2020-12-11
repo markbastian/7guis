@@ -14,7 +14,7 @@
     <ROW> = #'[A-Z]'
     <COL> = #'[0-9]'
     CELL = ROW COL
-    FN = '+' | '-'
+    FN = '+' | '-' | '*' | '/' | 'sqrt'
     <WS> = <' '>
     <ARG> = FORM | CELL | VALUE
     <ARGS> = ARG (WS+ ARG)*
@@ -27,7 +27,7 @@
     {:INT     (fn [s] (js/parseInt s))
      :FLT     (fn [s] (js/parseFloat s))
      :STRING  identity
-     :FN      (fn [op] [:FN ({"+" + "-" -} op)])
+     :FN      (fn [op] [:FN ({"+" + "-" - "*" * "/" / "sqrt" Math/sqrt} op)])
      :CELL    (fn [r c] (let [cell (keyword (str r c))]
                           (with-meta [:CELL cell] {:deps #{cell}})))
      :FORM    (fn [op & r]
@@ -60,4 +60,5 @@
   (text->parse-tree "=(+ 5 (- A4 7))")
   (-> "=(+ 5 B5 (- A4 7) (- C1 7))" text->parse-tree meta)
   (-> "=(+ 5 (- A4 7))" text->parse-tree (post-transform {:A4 42}))
-  (-> "=(+ 5 (- 7))" text->parse-tree (post-transform {})))
+  (-> "=(+ 5 (- 7))" text->parse-tree (post-transform {}))
+  (-> "=(sqrt 2)" text->parse-tree (post-transform {})))
