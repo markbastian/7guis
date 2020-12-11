@@ -11,6 +11,7 @@
 
 (defn press-enter-handler [e state cell]
   (let [v (.-value (.-target e))]
+    (println v)
     (when (= (.-key e) "Enter")
       (doto state
         (xcell/update-cell! cell v)
@@ -55,7 +56,7 @@
                        (get-in s [cell :value])))
        :on-click   (fn [_] (click-cell-handler state cell))
        :on-change  (fn [e] (cell-change-handler e state))
-       :onKeyPress (fn [e] (press-enter-handler state e cell))}])])
+       :onKeyPress (fn [e] (press-enter-handler e state cell))}])])
 
 (defn render-table-body [state nrows ncols]
   [:tbody
@@ -78,10 +79,8 @@
      [:input.form-control
       {:type       "text"
        :value      (:temp-value @state)
-       :on-change  (fn [e]
-                     (let [v (.-value (.-target e))]
-                       (swap! state assoc :temp-value v)))
-       :onKeyPress (fn [e] (press-enter-handler state e active-cell))}]]))
+       :on-change  (fn [e] (cell-change-handler e state))
+       :onKeyPress (fn [e] (press-enter-handler e state active-cell))}]]))
 
 (defn render-docs []
   [:div
@@ -104,8 +103,8 @@
   ;The state could simply be initialized here.
   (let [state global-state]
     (fn []
-      (let [nrows 100
-            ncols 26
+      (let [nrows 10
+            ncols 10
             border-style {:style {:border "1px solid black"}}]
         [:div
          [:h2 "Task 7: Cells"]

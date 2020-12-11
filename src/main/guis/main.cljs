@@ -23,13 +23,13 @@
      [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui06"} [:h4 "Circles"]]]
      [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui07"} [:h4 "Cells"]]]]
     [:div.tab-content
-     [:div#gui01.tab-pane.container-fluid.active [gui01/render]]
+     [:div#gui01.tab-pane.container-fluid.active [gui07/render]]
      [:div#gui02.tab-pane.fade [gui02/render]]
      [:div#gui03.tab-pane.fade [gui03/render]]
      [:div#gui04.tab-pane.fade [gui04/render]]
      [:div#gui05.tab-pane.fade [gui05/render]]
      [:div#gui06.tab-pane.fade [gui06/render]]
-     [:div#gui07.tab-pane.fade [gui07/render]]]]])
+     [:div#gui07.tab-pane.fade [gui01/render]]]]])
 
 (defn ^:dev/after-load ui-root []
   (rd/render [render] (.getElementById js/document "ui-root")))
