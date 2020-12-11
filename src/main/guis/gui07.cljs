@@ -71,6 +71,35 @@
             ^{:key (str "cell:" cell-index)}
             [render-cell state cell column-index row-index]))]))])
 
+(defn render-editor [state]
+  (when-some [active-cell (:active-cell @state)]
+    [:div.input-group-prepend
+     [:span#basic-addon1.input-group-text (str (name active-cell) ":")]
+     [:input.form-control
+      {:type       "text"
+       :value      (:temp-value @state)
+       :on-change  (fn [e]
+                     (let [v (.-value (.-target e))]
+                       (swap! state assoc :temp-value v)))
+       :onKeyPress (fn [e] (press-enter-handler state e active-cell))}]]))
+
+(defn render-docs []
+  [:div
+   [:h5 "About"]
+   [:p "This is an Excel-like spreadsheet with formulas, propagation, etc. Here are some things to try:"]
+   [:ul
+    [:li "Click a cell. Note that you can edit the cell in place or in the formula bar at the bottom."]
+    [:li "Formulas are Clojure-like. Try the following:"
+     [:ul
+      [:li "Enter a value like 42, 3.14159"]
+      [:li "Enter a formula starting with an equal sign followed by a form, like =(+ A1 4)"]
+      [:li "Forms can be nested (e.g. =(+ A1 (/ B3 1)))"]]]
+    [:li "Current valid operators are +, -, *, /, and sqrt."]
+    [:li "NOTE: Cycle detection hasn't been added yet, so currently a non-DAG will break. Future options:"
+     [:ul
+      [:li "Catch cycles and don't allow."]
+      [:li "Allow for fixed-point iteration. The numerical analyst in me wants this."]]]]])
+
 (defn render []
   ;The state could simply be initialized here.
   (let [state global-state]
@@ -84,27 +113,5 @@
           [:table border-style
            [render-table-header border-style ncols]
            [render-table-body state nrows ncols]]]
-         (when-some [active-cell (:active-cell @state)]
-           [:div.input-group-prepend
-            [:span#basic-addon1.input-group-text (str (name active-cell) ":")]
-            [:input.form-control
-             {:type       "text"
-              :value      (:temp-value @state)
-              :on-change  (fn [e]
-                            (let [v (.-value (.-target e))]
-                              (swap! state assoc :temp-value v)))
-              :onKeyPress (fn [e] (press-enter-handler state e active-cell))}]])
-         [:h5 "About"]
-         [:p "This is an Excel-like spreadsheet with formulas, propagation, etc. Here are some things to try:"]
-         [:ul
-          [:li "Click a cell. Note that you can edit the cell in place or in the formula bar at the bottom."]
-          [:li "Formulas are Clojure-like. Try the following:"
-           [:ul
-            [:li "Enter a value like 42, 3.14159"]
-            [:li "Enter a formula starting with an equal sign followed by a form, like =(+ A1 4)"]
-            [:li "Forms can be nested (e.g. =(+ A1 (/ B3 1)))"]]]
-          [:li "Current valid operators are +, -, *, /, and sqrt."]
-          [:li "NOTE: Cycle detection hasn't been added yet, so currently a non-DAG will break. Future options:"
-           [:ul
-            [:li "Catch cycles and don't allow."]
-            [:li "Allow for fixed-point iteration. The numerical analyst in me wants this."]]]]]))))
+         [render-editor state]
+         [render-docs]]))))
