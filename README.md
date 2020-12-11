@@ -19,6 +19,9 @@ The Cells API is fairly cool. I broke it out as two cljc nses so it could potent
   * Self-hosted cljs for cells vs. a parser?
   * More functions?
   * Evaluate watch-per-cell vs. global watch for performance
+  * Format column header cells and row index cells to gray and center aligned
+* Testing
+  * Move rich comment blocks into tests.
 
 ## Tips
 
