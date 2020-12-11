@@ -12,13 +12,14 @@
 (defn render []
   [:div
    [:h1 "7 GUI Tasks"]
+   [gui07/render]
    [gui01/render]
    [gui02/render]
    [gui03/render]
    [gui04/render]
    [gui05/render]
    [gui06/render]
-   [gui07/render]
+
    ])
 
 (defn ^:dev/after-load ui-root []
