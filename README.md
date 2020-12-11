@@ -4,9 +4,14 @@ An implementation of the [7 Tasks](https://eugenkiss.github.io/7guis/tasks).
 ## Status
 MVP Feature Complete.
 
+## Key Concepts
+
+Each of UIs has a standalone state (a reagent atom) that is the source-of-record truth model for the UI. This is critical so you don't have state spread out all over the place. Get the model right and sync the UI to it.
+
+The Cells API is fairly cool. I broke it out as two cljc nses so it could potentially be front-end, back-end, Swing, etc. The parser is a bit limited, but this is round 0. Another thought is to have self-hosted cljs so that I can do "real" evaluation of forms. I'd use a similar strategy for cell lineage and propagation.
+
 ## TODOS
 
-* There's a string formatting issue with the temp converter in which you can't start out with a negative temp or type a decimal in place. The problem has to do with how the parsing of the string occurs (not allowing the intermediate "bad" string).
 * I am not a CSS genius. I need to skill up on that front and add a little polish:
   * Make cells in table fill entire width of screen.
   * Add horizontal and vertical scroll bars.
