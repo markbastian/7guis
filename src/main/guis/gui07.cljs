@@ -102,8 +102,8 @@
   ;The state could simply be initialized here.
   (let [state global-state]
     (fn []
-      (let [nrows 10
-            ncols 10
+      (let [nrows 100
+            ncols 26
             border-style {:style {:border "1px solid black"}}]
         [:div
          [:h2 "Task 7: Cells"]
