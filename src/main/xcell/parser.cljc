@@ -19,7 +19,7 @@
     <ARG> = FORM | CELL | VALUE
     <ARGS> = ARG (WS+ ARG)*
     FORM = <'('> FN WS+ ARGS <')'>
-    FORMULA = <'='> FORM
+    FORMULA = <'='> WS* (FORM | CELL)
     "))
 
 (defn pre-transform [parse-tree]
@@ -50,6 +50,7 @@
 (comment
   ;TODO - Create tests
   (text->parse-tree "A1")
+  (text->parse-tree "=A1")
   (text->parse-tree "42")
   (text->parse-tree "-21")
   (text->parse-tree "3.14")
@@ -57,6 +58,7 @@
   (text->parse-tree "'-3.14'")
   (text->parse-tree "=(+ 5 (- A4 7))")
   (-> "=(- A4 7)" text->parse-tree meta :deps)
+  (-> "=  (- A4 7)" text->parse-tree meta :deps)
   (text->parse-tree "=(+ 5 (- A4 7))")
   (-> "=(+ 5 B5 (- A4 7) (- C1 7))" text->parse-tree meta)
   (-> "=(+ 5 (- A4 7))" text->parse-tree (post-transform {:A4 42}))
