@@ -1,7 +1,7 @@
 # 7 GUIS
 An implementation of the [7 Tasks](https://eugenkiss.github.io/7guis/tasks).
 
-This is the code repo. See it live [right here](https://markbastian.github.io/7guis/index.html).
+This is the code repo. See it live [right here](https://markbastian.github.io/7guis/public/index.html).
 
 ## Status
 MVP Feature Complete.
