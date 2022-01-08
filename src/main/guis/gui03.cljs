@@ -48,7 +48,7 @@
            }]]
         (let [{:keys [booking-type depart-date return-date]} @state]
           [:div#flightBookingModal.modal.fade
-           {:tabindex "-1" :role "dialog"}
+           {:tabIndex "-1" :role "dialog"}
            [:div.modal-dialog {:role "document"}
             [:div.modal-content
              [:div.modal-header

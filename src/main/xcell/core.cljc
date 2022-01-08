@@ -30,21 +30,25 @@
 (defn update-cell
   "Update the string contents of a cell."
   [graph cell text]
-  (let [p (parser/parser text)]
-    (if-not (insta/failure? p)
-      (let [parse-tree (parser/pre-transform p)
-            ancestors (:deps (meta parse-tree))
-            value (parser/post-transform parse-tree graph)
-            new-cell {:text       text
-                      :parse-tree parse-tree
-                      :ancestors  (set ancestors)
-                      :value      value}]
+  (if (seq text)
+    (let [p (parser/parser text)]
+      (if-not (insta/failure? p)
+        (let [parse-tree (parser/pre-transform p)
+              ancestors (:deps (meta parse-tree))
+              value (parser/post-transform parse-tree graph)
+              new-cell {:text       text
+                        :parse-tree parse-tree
+                        :ancestors  (set ancestors)
+                        :value      value}]
+          (-> graph
+              (remove-ancestor-links cell)
+              (update cell (fn [c]
+                             (dissoc (into (or c {}) new-cell) :error)))
+              (add-ancestor-links cell ancestors)))
         (-> graph
-            (remove-ancestor-links cell)
-            (update cell (fn [c]
-                           (dissoc (into (or c {}) new-cell) :error)))
-            (add-ancestor-links cell ancestors)))
-      (assoc-in graph [cell :error] (insta/get-failure p)))))
+            (assoc-in [cell :text] text)
+            (assoc-in [cell :error] (insta/get-failure p)))))
+    graph))
 
 (defn propagate-change
   "Propagate the value of a cell to its children."
@@ -60,7 +64,7 @@
   (doto state
     (add-watch
       cell
-      (fn [_ _ o n]
+      (fn [_ state o n]
         (let [{descendants :descendants} (n cell)]
           (when-not (= (get o cell) (get n cell))
             (doseq [descendant descendants]
@@ -69,6 +73,9 @@
 
 (comment
   (update-cell {} :A1 "42")
+  ;TODO - Decide on the correct behavior here. Currently does nothing.
+  ; Should it eject the cell from the state?
+  (update-cell {} :A1 "")
 
   (-> {}
       (update-cell :A1 "42")
@@ -93,6 +100,8 @@
 
   @gstate
   (update-cell! gstate :A1 "0")
+
+  (update-cell! gstate :A1 "")
   )
 
 

@@ -9,12 +9,6 @@
       (xcell/update-cell! :A1 "42")
       (xcell/update-cell! :B2 "=(+ A1 1)")))
 
-(defn press-enter-handler [e state cell]
-  (let [v (.-value (.-target e))]
-    (when (= (.-key e) "Enter")
-      (doto state
-        (xcell/update-cell! cell v)
-        (swap! dissoc :temp-value)))))
 
 (defn render-table-header [border-style ncols]
   [:thead
@@ -25,38 +19,59 @@
         [:th (assoc-in border-style [:style :text-align] :center)
          (when-not (zero? i) col)]))]])
 
-(defn click-cell-handler [state cell]
-  (let [{:keys [active-cell temp-value]} @state]
-    (when
-      (and active-cell temp-value)
-      (xcell/update-cell! state active-cell temp-value))
-    (doto state
-      (swap! assoc
-             :active-cell cell
-             :temp-value (get-in @state [cell :text])))))
-
 (defn cell-change-handler [event state]
   (let [v (.-value (.-target event))]
     (swap! state assoc :temp-value v)))
 
-(defn render-cell [state cell column-index row-index]
-  [:td (cond-> {:style {:border "1px solid black"}}
-               (zero? column-index)
-               (-> (assoc-in [:style :text-align] :center)
-                   (assoc-in [:style :background-color] :gray)))
-   (if (zero? column-index)
-     row-index
-     [:input.form-control
-      {:type       "text"
-       :style      {:border :none :width :120px}
-       :value      (let [{:keys [temp-value active-cell] :as s} @state]
-                     (or
-                       (and (= cell active-cell) temp-value)
-                       (get-in s [cell :value])))
-       :on-click   (fn [_] (click-cell-handler state cell))
-       :on-change  (fn [e] (cell-change-handler e state))
-       :onKeyPress (fn [e] (press-enter-handler e state cell))}])])
+(defn update-cell! [event state cell]
+  (let [v (.-value (.-target event))]
+    (xcell/update-cell! state cell v)))
 
+(defn press-enter-handler [e state cell]
+  (when (= (.-key e) "Enter")
+    (update-cell! e state cell)))
+
+(defn select-next-cell [column-index row-index]
+  (let [col (char (+ 64 column-index))
+        cell (str col (inc row-index) "-editor")]
+    (when-some [element (.getElementById js/document cell)]
+      (.focus element))))
+
+;http://help.openspan.com/80/HTML_Table_Designer/html_table_designer_-_Cell_-_properties,_methods_and_events.htm
+(defn render-cell [state cell column-index row-index]
+  (let [c (r/cursor state [cell :value])
+        e (r/cursor state [cell :error])
+        t (r/cursor state [cell :text])
+        a (r/atom false)]
+    (fn [state cell column-index row-index]
+      [:td (cond-> {:style {:border "1px solid black"}}
+                   (zero? column-index)
+                   (-> (assoc-in [:style :text-align] :center)
+                       (assoc-in [:style :background-color] :gray)))
+       (if (zero? column-index)
+         row-index
+         [:input.form-control
+          {:type       "text"
+           :style      {:border :none :width :120px}
+           :id (str (name cell) "-editor")
+           :value      (cond
+                         @a @t
+                         @e "ERROR!"
+                         :default @c)
+           :on-click (fn [_] (reset! a true))
+           :on-focus (fn [_] (reset! a true))
+           :on-blur   (fn [e]
+                        (update-cell! e state cell)
+                        (reset! a false))
+           :on-change  (fn [event]
+                         (let [v (.-value (.-target event))]
+                           (reset! t v)))
+           :onKeyPress (fn [e]
+                         (when (= (.-key e) "Enter")
+                           (update-cell! e state cell)
+                           (select-next-cell column-index row-index)))}])])))
+
+;https://github.com/reagent-project/reagent/issues/34
 (defn render-table-body [state nrows ncols]
   [:tbody
    (doall
@@ -67,19 +82,21 @@
           (for [column-index (range (inc ncols))
                 :let [col (char (+ 64 column-index))
                       cell-index (str col row-index)
-                      cell (keyword cell-index)]]
+                      cell (keyword (str col row-index))]]
             ^{:key (str "cell:" cell-index)}
             [render-cell state cell column-index row-index]))]))])
 
 (defn render-editor [state]
+  ;Note - there is no active cell atm.
   (when-some [active-cell (:active-cell @state)]
     [:div.input-group-prepend
      [:span#basic-addon1.input-group-text (str (name active-cell) ":")]
      [:input.form-control
       {:type       "text"
-       :value      (:temp-value @state)
-       :on-change  (fn [e] (cell-change-handler e state))
-       :onKeyPress (fn [e] (press-enter-handler e state active-cell))}]]))
+       ;:value      (:temp-value @state)
+       ;:on-change  (fn [e] (cell-change-handler e state))
+       ;:onKeyPress (fn [e] (press-enter-handler e state active-cell))
+       }]]))
 
 (defn render-docs []
   [:div
@@ -103,7 +120,7 @@
   (let [state global-state]
     (fn []
       (let [nrows 100
-            ncols 26
+            ncols 10
             border-style {:style {:border "1px solid black"}}]
         [:div
          [:h2 "Task 7: Cells"]
