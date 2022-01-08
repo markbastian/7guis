@@ -1,6 +1,8 @@
 ;(shadow.cljs.devtools.api/nrepl-select :frontend)
 (ns guis.main
-  (:require [guis.gui01 :as gui01]
+  (:require [guis.gui01.views :as rf.gui01]
+            [guis.gui02.views :as rf.gui02]
+            [guis.gui01 :as gui01]
             [guis.gui02 :as gui02]
             [guis.gui03 :as gui03]
             [guis.gui04 :as gui04]
@@ -23,8 +25,10 @@
      [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui06"} [:h4 "Circles"]]]
      [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui07"} [:h4 "Cells"]]]]
     [:div.tab-content
-     [:div#gui01.tab-pane.container-fluid.active [gui01/render]]
-     [:div#gui02.tab-pane.fade [gui02/render]]
+     [:div#gui01.tab-pane.container-fluid.active [rf.gui01/main]]
+     ;[:div#gui01.tab-pane.container-fluid.active [gui01/render]]
+     [:div#gui02.tab-pane.fade [rf.gui02/main]]
+     ;[:div#gui02.tab-pane.fade [gui02/render]]
      [:div#gui03.tab-pane.fade [gui03/render]]
      [:div#gui04.tab-pane.fade [gui04/render]]
      [:div#gui05.tab-pane.fade [gui05/render]]
