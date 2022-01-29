@@ -1,4 +1,4 @@
-(ns guis.gui04
+(ns guis.reagent.gui04
   (:require [reagent.core :as r]))
 
 (def ms-per-sec 1000)

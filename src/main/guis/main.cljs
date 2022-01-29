@@ -1,44 +1,79 @@
 ;(shadow.cljs.devtools.api/nrepl-select :frontend)
 (ns guis.main
-  (:require [guis.gui01.views :as rf.gui01]
-            [guis.gui02.views :as rf.gui02]
-            [guis.gui01 :as gui01]
-            [guis.gui02 :as gui02]
-            [guis.gui03 :as gui03]
-            [guis.gui04 :as gui04]
-            [guis.gui05 :as gui05]
-            [guis.gui06 :as gui06]
-            [guis.gui07 :as gui07]
-            [reagent.dom :as rd]))
+  (:require [reitit.frontend :as rf]
+            [reitit.frontend.easy :as rfe]
+            [reitit.coercion.spec :as rss]
+            [guis.reagent.core :as rg.7guis]
+            [guis.re-frame.core :as rf.7guis]
+            [reagent.dom :as rd]
+            [re-frame.core :as re-frame]))
 
-(defn render []
+(defn home-page []
   [:div
-   [:h1 "7 GUI Tasks"]
-   [:h3 "by Mark Bastian"]
-   [:div
-    [:ul.nav.nav-tabs.nav-fill.tabs-fixed-top
-     [:li.nav-item [:a.nav-link.active {:data-toggle "tab" :href "#gui01"} [:h4 "Counter"]]]
-     [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui02"} [:h4 "Temp"]]]
-     [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui03"} [:h4 "Flight Booker"]]]
-     [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui04"} [:h4 "Timer"]]]
-     [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui05"} [:h4 "CRUD"]]]
-     [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui06"} [:h4 "Circles"]]]
-     [:li.nav-item [:a.nav-link {:data-toggle "tab" :href "#gui07"} [:h4 "Cells"]]]]
-    [:div.tab-content
-     [:div#gui01.tab-pane.container-fluid.active [rf.gui01/main]]
-     ;[:div#gui01.tab-pane.container-fluid.active [gui01/render]]
-     [:div#gui02.tab-pane.fade [rf.gui02/main]]
-     ;[:div#gui02.tab-pane.fade [gui02/render]]
-     [:div#gui03.tab-pane.fade [gui03/render]]
-     [:div#gui04.tab-pane.fade [gui04/render]]
-     [:div#gui05.tab-pane.fade [gui05/render]]
-     [:div#gui06.tab-pane.fade [gui06/render]]
-     [:div#gui07.tab-pane.fade [gui07/render]]]]])
+   [:h2 "Welcome to 7 GUIs"]])
 
-(defn ^:dev/after-load ui-root []
-  (rd/render [render] (.getElementById js/document "ui-root")))
+(defn about-page []
+  [:div
+   [:h2 "7 GUI Tasks"]
+   [:h3 "by Mark Bastian"]])
 
+(defn current-page []
+  (let [route-name @(re-frame/subscribe [::route-name])
+        route-view @(re-frame/subscribe [::route-view])]
+    [:div
+     [:nav.navbar.navbar-expand-lg.navbar-light.bg-light
+      [:a.navbar-brand {:href "#"} "7 GUIs"]
+      [:button.navbar-toggler {:type "button" :data-toggle "collapse"}
+       [:span.navbar-toggler-icon]]
+      [:div.collapse.navbar-collapse
+       [:div.navbar-nav
+        [:a.nav-item.nav-link {:href (rfe/href ::home) :active (str (= ::home route-name))} "Home"]
+        [:a.nav-item.nav-link {:href (rfe/href ::reagent) :active (str (= ::reagent route-name))} "Reagent"]
+        [:a.nav-item.nav-link {:href (rfe/href ::re-frame) :active (str (= ::re-frame route-name))}  "Re-Frame"]
+        [:a.nav-item.nav-link {:href (rfe/href ::about) :active (str (= ::about route-name))}  "About"]]]]
+     (when route-view
+       (route-view))]))
+
+(def routes
+  [["/"
+    {:name ::home
+     :view home-page}]
+   ["/about"
+    {:name ::about
+     :view about-page}]
+   ["/reagent"
+    {:name ::reagent
+     :view rg.7guis/render}]
+   ["/re-frame"
+    {:name ::re-frame
+     :view rf.7guis/render}]])
+
+;; Events
+(re-frame/reg-event-fx
+  ::initialize
+  (fn [{db :db} _]
+    {:db (assoc db :clicks 0)}))
+
+(re-frame/reg-event-fx
+  ::route
+  (fn [{db :db} [_ route]]
+    {:db (assoc db :route route)}))
+
+;; Subscriptions
+(re-frame/reg-sub ::route (fn [db] (:route db)))
+
+(re-frame/reg-sub ::route-name (fn [db] (-> db :route :data :name)))
+(re-frame/reg-sub ::route-view (fn [db] (-> db :route :data :view)))
+
+;;https://github.com/metosin/reitit/blob/master/examples/frontend/src/frontend/core.cljs
 (defn init []
-  (let [root (.getElementById js/document "ui-root")]
-    (.log js/console root)
-    (rd/render [render] root)))
+  (rfe/start!
+    (rf/router routes {:data {:coercion rss/coercion}})
+    (fn [m]
+      (re-frame/dispatch [::route m]))
+    ;; set to false to enable HistoryAPI
+    {:use-fragment true})
+  (rd/render [current-page] (.getElementById js/document "ui-root")))
+
+(defn ^:dev/after-load ui-root [] (init))
+

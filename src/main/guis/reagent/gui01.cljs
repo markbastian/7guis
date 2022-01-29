@@ -1,5 +1,6 @@
-(ns guis.gui01
-  (:require [reagent.core :as r]))
+(ns guis.reagent.gui01
+  (:require [reagent.core :as r]
+            [guis.common.gui01 :as gc1]))
 
 (defn render []
   (let [count (r/atom 0)]
@@ -11,5 +12,4 @@
          :on-click (fn [_] (swap! count inc))}
         "Count"
         [:span.badge.badge-light @count]]
-       [:h5 "About"]
-       [:p "It's a counter. Click the button and the count on the badge goes up."]])))
+       gc1/about])))

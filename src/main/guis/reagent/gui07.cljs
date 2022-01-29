@@ -1,4 +1,4 @@
-(ns guis.gui07
+(ns guis.reagent.gui07
   (:require [reagent.core :as r]
             [xcell.core :as xcell]))
 

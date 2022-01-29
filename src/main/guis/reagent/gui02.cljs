@@ -1,11 +1,6 @@
-(ns guis.gui02
-  (:require [reagent.core :as r]))
-
-(defn f->c [f]
-  (/ (* (- f 32) 5) 9.0))
-
-(defn c->f [c]
-  (+ (/ (* c 9) 5) 32.0))
+(ns guis.reagent.gui02
+  (:require [reagent.core :as r]
+            [guis.common.gui02 :as gc2]))
 
 (defn gain-focus [e state scale]
   (let [v (.-value (.-target e))]
@@ -38,10 +33,6 @@
       [:div
        [:h2 "Task 2: Temperature Converter"]
        [:span
-        [render-temp state "F" :fahrenheit c->f]
-        [render-temp state "C" :celsius f->c]]
-       [:h5 "About"]
-       [:p "Temperature converter"]
-       [:ul
-        [:li "Enter a Fahrenheit temperature and watch the Celsius value change."]
-        [:li "Enter a Celsius temperature and watch the Fahrenheit value change."]]])))
+        [render-temp state "F" :fahrenheit gc2/c->f]
+        [render-temp state "C" :celsius gc2/f->c]]
+       gc2/about])))

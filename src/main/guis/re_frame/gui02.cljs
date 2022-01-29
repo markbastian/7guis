@@ -1,5 +1,6 @@
-(ns guis.gui02.views
-  (:require [re-frame.core :as rf]))
+(ns guis.re-frame.gui02
+  (:require [re-frame.core :as rf]
+            [guis.common.gui02 :as gc2]))
 
 (defn render-temp [lbl scale]
   (let [temperature (rf/subscribe [::temperature scale])]
@@ -8,7 +9,6 @@
      [:input.form-control
       {:type      "text"
        :on-focus  (fn [_] (rf/dispatch [::set-edit-scale scale]))
-       ;:on-blur (fn [_] (js/console.log "BLUR"))
        :value     @temperature
        :on-change (fn [e] (rf/dispatch [::set-temperature (.-value (.-target e)) scale]))}]]))
 
@@ -18,11 +18,7 @@
    [:span
     [render-temp "F" :fahrenheit]
     [render-temp "C" :celsius]]
-   [:h5 "About"]
-   [:p "Temperature converter"]
-   [:ul
-    [:li "Enter a Fahrenheit temperature and watch the Celsius value change."]
-    [:li "Enter a Celsius temperature and watch the Fahrenheit value change."]]])
+   gc2/about])
 
 ;; Events
 (rf/reg-event-fx
@@ -31,12 +27,6 @@
     {:db (-> db
              (assoc :edit-scale scale)
              (dissoc :edit-text))}))
-
-(defn f->c [f]
-  (/ (* (- f 32) 5) 9.0))
-
-(defn c->f [c]
-  (+ (/ (* c 9) 5) 32.0))
 
 (rf/reg-event-fx
   ::set-temperature
@@ -48,7 +38,7 @@
                (assoc :temperature
                       (case scale
                         :celsius temperature
-                        :fahrenheit (f->c temperature))))})))
+                        :fahrenheit (gc2/f->c temperature))))})))
 
 ;; Subscriptions
 (rf/reg-sub
@@ -58,4 +48,4 @@
       edit-text
       (case scale
         :celsius temperature
-        :fahrenheit (c->f temperature)))))
+        :fahrenheit (gc2/c->f temperature)))))

@@ -1,4 +1,4 @@
-(ns guis.gui06
+(ns guis.reagent.gui06
   (:require [reagent.core :as r]))
 
 (defn get-point [event]

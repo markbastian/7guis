@@ -1,5 +1,6 @@
-(ns guis.gui01.views
-  (:require [re-frame.core :as rf]))
+(ns guis.re-frame.gui01
+  (:require [re-frame.core :as rf]
+            [guis.common.gui01 :as gc1]))
 
 (defn main []
   (let [clicks (rf/subscribe [::clicks])]
@@ -10,8 +11,7 @@
        :on-click (fn [_] (rf/dispatch [::click]))}
       "Count"
       [:span.badge.badge-light (or @clicks 0)]]
-     [:h5 "About"]
-     [:p "It's a counter. Click the button and the count on the badge goes up."]]))
+     gc1/about]))
 
 ;; Events
 (rf/reg-event-fx

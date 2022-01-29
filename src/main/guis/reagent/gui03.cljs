@@ -1,5 +1,6 @@
-(ns guis.gui03
-  (:require [reagent.core :as r]))
+(ns guis.reagent.gui03
+  (:require [reagent.core :as r]
+            [guis.common.gui03 :as gc3]))
 
 (defn invalid-flight? [{:keys [booking-type depart-date return-date]}]
   (and
@@ -64,11 +65,4 @@
           :data-toggle "modal"
           :data-target "#flightBookingModal"}
          "Book"]]
-       [:h5 "About"]
-       [:p "Book some flights with constraints"]
-       [:ul
-        [:li "Note that one-way flights are the default."]
-        [:li "If you adjust the departure greater than the return time, the return time will track with it."]
-        [:li "Select return flight."]
-        [:li "The return flight will always be constrained to be >= the depart time."]
-        [:li "The Book button will give you a modal popup telling you your flight details."]]])))
+       gc3/about])))
