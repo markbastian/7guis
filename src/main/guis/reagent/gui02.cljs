@@ -20,7 +20,7 @@
 
 (defn render-temp [state lbl scale xform]
   [:div.input-group-prepend
-   [:span#basic-addon1.input-group-text {:style {:width :30px :text-align :center}} lbl]
+   [:span.input-group-text {:style {:width :30px :text-align :center}} lbl]
    [:input.form-control
     {:type      "text"
      :on-focus  (fn [e] (gain-focus e state scale))

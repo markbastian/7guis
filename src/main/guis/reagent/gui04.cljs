@@ -1,5 +1,6 @@
 (ns guis.reagent.gui04
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [guis.common.gui04 :as gc04]))
 
 (def ms-per-sec 1000)
 (def max-duration 100)
@@ -59,12 +60,4 @@
           {:type     "button"
            :on-click (fn [_] (reset-state! state))}
           "Reset"]]]
-       [:h5 "About"]
-       [:p "Stateful timer stuff"]
-       [:ul
-        [:li "Press reset if the time has run to the end of the progress bar."]
-        [:li "Watch the elapsed time elapse."]
-        [:li "Drag the duration slider to modify the duration, seeing the progress bar move inversely with the duration."]
-        [:li "Note that the time will be capped to your duration."]
-        [:li "Make the duration longer and the time will keep rolling forward."]
-        [:li "Reset as desired."]]])))
+       gc04/about])))

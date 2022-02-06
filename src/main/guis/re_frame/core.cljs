@@ -2,10 +2,13 @@
   (:require [guis.re-frame.gui01 :as gui01]
             [guis.re-frame.gui02 :as gui02]
             [guis.re-frame.gui03 :as gui03]
-            [guis.reagent.gui04 :as gui04]
-            [guis.reagent.gui05 :as gui05]
+            [guis.re-frame.gui04 :as gui04]
+            [guis.re-frame.gui05 :as gui05]
             [guis.reagent.gui06 :as gui06]
             [guis.reagent.gui07 :as gui07]))
+
+;https://juju.one/complete-re-frame-tutorial/
+;https://purelyfunctional.tv/guide/re-frame-building-blocks/
 
 (defn render []
   [:div
@@ -21,7 +24,7 @@
     [:div#gui01.tab-pane.container-fluid.active [gui01/main]]
     [:div#gui02.tab-pane.fade [gui02/main]]
     [:div#gui03.tab-pane.fade [gui03/main]]
-    [:div#gui04.tab-pane.fade [gui04/render]]
-    [:div#gui05.tab-pane.fade [gui05/render]]
+    [:div#gui04.tab-pane.fade [gui04/main]]
+    [:div#gui05.tab-pane.fade [gui05/main]]
     [:div#gui06.tab-pane.fade [gui06/render]]
     [:div#gui07.tab-pane.fade [gui07/render]]]])

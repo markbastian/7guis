@@ -2,35 +2,38 @@
   (:require [re-frame.core :as rf]
             [guis.common.gui03 :as gc3]))
 
+(def db-key ::gui03)
+
 ;; Events
 (rf/reg-event-fx
   ::initialize
-  (fn [_ _]
+  (fn [{db :db} _]
     (let [today (subs (.toISOString (js/Date.)) 0 10)]
-      {:db {:booking-type :one-way
-            :depart-date  today
-            :return-date  today}})))
+      {:db (assoc db db-key
+                     {:booking-type :one-way
+                      :depart-date  today
+                      :return-date  today})})))
 
 (rf/reg-event-fx
   ::booking-type
   (fn [{db :db} [_ booking-type]]
-    {:db (assoc db :booking-type booking-type)}))
+    {:db (assoc-in db [db-key :booking-type] booking-type)}))
 
 (rf/reg-event-fx
   ::depart-date
   (fn [{db :db} [_ booking-type]]
-    {:db (assoc db :depart-date booking-type)}))
+    {:db (assoc-in db [db-key :depart-date] booking-type)}))
 
 (rf/reg-event-fx
   ::return-date
   (fn [{db :db} [_ booking-type]]
-    {:db (assoc db :return-date booking-type)}))
+    {:db (assoc-in db [db-key :return-date] booking-type)}))
 
 ;; Subscriptions
-(rf/reg-sub ::booking-type (fn [db] (:booking-type db)))
-(rf/reg-sub ::depart-date (fn [db] (:depart-date db)))
-(rf/reg-sub ::return-date (fn [db] (:return-date db)))
-(rf/reg-sub ::initialized (fn [db] (some? (:booking-type db))))
+(rf/reg-sub ::booking-type (fn [db] (-> db db-key :booking-type)))
+(rf/reg-sub ::depart-date (fn [db] (-> db db-key :depart-date)))
+(rf/reg-sub ::return-date (fn [db] (-> db db-key :return-date)))
+(rf/reg-sub ::initialized (fn [db] (some? (-> db db-key :booking-type))))
 
 (defn invalid-flight? [{:keys [booking-type depart-date return-date]}]
   (and
@@ -105,7 +108,8 @@
         "Book"]])))
 
 (defn ^:export main []
-  (if @(rf/subscribe [::initialized])
+  (rf/dispatch [::initialize])
+  (fn []
     [:div
      [:h2 "Task 3: Flight Booker"]
      [:span
@@ -113,5 +117,4 @@
       [departure-selector]
       [return-selector]
       [booking-modal]]
-     gc3/about]
-    (rf/dispatch [::initialize])))
+     gc3/about]))
