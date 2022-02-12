@@ -23,9 +23,36 @@
     {:db (assoc-in db [db-key k] v)}))
 
 (rf/reg-event-fx
+  ::select-individual
+  (fn [{db :db} [_ first-name surname index]]
+    {:db (update-in db [db-key] merge {:first-name     first-name
+                                       :surname        surname
+                                       :selected-index index})}))
+
+(rf/reg-event-fx
   ::create-name
   (fn [{db :db} [_ first-name surname]]
-    {:db (update-in db [db-key :names] conj {:first-name first-name :surname surname})}))
+    {:db (-> db
+             (update-in [db-key :names] conj {:first-name first-name :surname surname})
+             (update-in [db-key] dissoc :selected-index))}))
+
+(rf/reg-event-fx
+  ::update-individual
+  (fn [{db :db} [_ first-name surname index]]
+    {:db (assoc-in db [db-key :names index] {:first-name first-name :surname surname})}))
+
+(rf/reg-event-fx
+  ::delete-individual
+  (fn [{db :db} [_ index]]
+    (letfn [(remove-at [names selected-index]
+              (let [[pre post] (split-at selected-index names)]
+                (into (vec pre) (rest post))))]
+      {:db (-> db
+               (update-in [db-key :names] remove-at index)
+               (update-in [db-key] dissoc
+                          :selected-index
+                          :first-name
+                          :surname))})))
 
 ;; Subs
 (rf/reg-sub ::state-key (fn [db [_ k]] (get-in db [db-key k])))
@@ -34,6 +61,12 @@
 (rf/reg-sub ::prefilter (fn [db] (get-in db [db-key :prefilter])))
 (rf/reg-sub ::selected-index (fn [db] (get-in db [db-key :selected-index])))
 (rf/reg-sub ::names (fn [db] (get-in db [db-key :names])))
+(rf/reg-sub
+  ::selected-name
+  :<- [::selected-index]
+  :<- [::names]
+  (fn [[selected-index names]]
+    (get names selected-index)))
 
 (defn input-box [state-key]
   (let [value @(rf/subscribe [::state-key state-key])]
@@ -44,78 +77,74 @@
                    (let [v (.-value (.-target e))]
                      (rf/dispatch [::set-state-key state-key v])))}]))
 
+(defn name-list []
+  (let [prefilter @(rf/subscribe [::prefilter])
+        selected-index @(rf/subscribe [::selected-index])
+        names @(rf/subscribe [::names])]
+    [:ul.list-group
+     (doall
+       (for [[idx {:keys [first-name surname] :as item}] (map vector (range) names)
+             :let [txt (str surname ", " first-name)]
+             :when (cs/starts-with? txt prefilter)]
+         ^{:key (assoc item :index idx)}
+         [(if (= idx selected-index)
+            :li.list-group-item.active
+            :li.list-group-item)
+          {:on-click #(rf/dispatch [::select-individual first-name surname idx])}
+          txt]))]))
+
+(defn create-button []
+  (let [first-name @(rf/subscribe [::first-name])
+        surname @(rf/subscribe [::surname])]
+    [:button.btn.btn-primary
+     {:type     "button"
+      :disabled (or
+                  (empty? first-name)
+                  (empty? surname))
+      :on-click #(rf/dispatch [::create-name first-name surname])}
+     "Create"]))
+
+(defn update-button []
+  (let [first-name @(rf/subscribe [::first-name])
+        surname @(rf/subscribe [::surname])
+        selected-index @(rf/subscribe [::selected-index])
+        {selected-first-name :first-name selected-surname :surname} @(rf/subscribe [::selected-name])]
+    [:button.btn.btn-primary
+     {:type     "button"
+      :disabled (or
+                  (nil? selected-index)
+                  (and
+                    (= selected-first-name first-name)
+                    (= selected-surname surname)))
+      :on-click #(rf/dispatch [::update-individual first-name surname selected-index])}
+     "Update"]))
+
+(defn delete-button []
+  (let [selected-index @(rf/subscribe [::selected-index])]
+    [:button.btn.btn-primary
+     {:type     "button"
+      :disabled (nil? selected-index)
+      :on-click #(rf/dispatch [::delete-individual selected-index])}
+     "Delete"]))
+
 (defn main []
   (rf/dispatch [::initialize])
   (fn []
-    (let [first-name @(rf/subscribe [::first-name])
-          surname @(rf/subscribe [::surname])
-          prefilter @(rf/subscribe [::prefilter])
-          selected-index @(rf/subscribe [::selected-index])
-          names @(rf/subscribe [::names])
-          state nil
-          ]
-      [:div
-       [:h2 "Task 5: CRUD"]
-       [:span
-        [:div.input-group-prepend
-         [:span.input-group-text {:style {:width :130px}} "Filter Prefix"]
-         [input-box :prefilter]]
-        [:div.input-group-prepend
-         [:span.input-group-text {:style {:width :130px}} "Name:"]
-         [input-box :first-name]]
-        [:div.input-group-prepend
-         [:span.input-group-text {:style {:width :130px}} "Surname:"]
-         [input-box :surname]]
-        [:ul.list-group
-           (doall
-             (for [[idx {:keys [first-name surname] :as item}] (map vector (range) names)
-                   :let [txt (str surname ", " first-name)]
-                   :when (cs/starts-with? txt prefilter)]
-               ^{:key (assoc item :index idx)}
-               [(if (= idx selected-index)
-                  :li.list-group-item.active
-                  :li.list-group-item)
-                {:on-click (fn [_]
-                             ;; Perhaps if selecting the state have a downstream
-                             ;; effect to set the name and surname to this idx
-                             (rf/dispatch [::set-state-key :selected-index idx])
-                             ;;TODO - Also set the first name and surname
-                             #_(swap! state
-                                      (fn [v]
-                                        (-> v
-                                            (assoc :selected-index idx)
-                                            (into item)))))}
-                txt]))]
-        [:span
-         [:button.btn.btn-primary
-          {:type     "button"
-           :on-click (fn [_]
-                       (let [n {:first-name first-name :surname surname}]
-                         (rf/dispatch [::create-name first-name surname])
-                         #_(swap! state
-                                  (fn [v]
-                                    (-> v
-                                        (update :names conj n)
-                                        (dissoc :selected-index))))))}
-          "Create"]
-         [:button.btn.btn-primary
-          {:type     "button"
-           :on-click (fn [_]
-                       (when selected-index
-                         #_(swap! state assoc-in [:names selected-index]
-                                  (select-keys @state [:first-name :surname]))))}
-          "Update"]
-         [:button.btn.btn-primary
-          {:type     "button"
-           :on-click (fn [_]
-                       (letfn [(remove-at [names selected-index]
-                                 (let [[pre post] (split-at selected-index names)]
-                                   (into (vec pre) (rest post))))]
-                         (when selected-index
-                           #_(swap! state
-                                    (fn [st]
-                                      (-> st
-                                          (update :names remove-at selected-index)
-                                          (dissoc :selected-index)))))))}
-          "Delete"]]]
-       gc05/about])))
+    [:div
+     [:h2 "Task 5: CRUD"]
+     [:span
+      [:div.input-group-prepend
+       [:span.input-group-text {:style {:width :130px}} "Filter Prefix"]
+       [input-box :prefilter]]
+      [:div.input-group-prepend
+       [:span.input-group-text {:style {:width :130px}} "Name:"]
+       [input-box :first-name]]
+      [:div.input-group-prepend
+       [:span.input-group-text {:style {:width :130px}} "Surname:"]
+       [input-box :surname]]
+      [name-list]
+      [:span
+       [create-button]
+       [update-button]
+       [delete-button]]]
+     gc05/about]))
