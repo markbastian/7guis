@@ -4,7 +4,7 @@
             [guis.re-frame.gui03 :as gui03]
             [guis.re-frame.gui04 :as gui04]
             [guis.re-frame.gui05 :as gui05]
-            [guis.reagent.gui06 :as gui06]
+            [guis.re-frame.gui06 :as gui06]
             [guis.reagent.gui07 :as gui07]))
 
 ;https://juju.one/complete-re-frame-tutorial/
@@ -26,5 +26,5 @@
     [:div#gui03.tab-pane.fade [gui03/main]]
     [:div#gui04.tab-pane.fade [gui04/main]]
     [:div#gui05.tab-pane.fade [gui05/main]]
-    [:div#gui06.tab-pane.fade [gui06/render]]
+    [:div#gui06.tab-pane.fade [gui06/main]]
     [:div#gui07.tab-pane.fade [gui07/render]]]])
